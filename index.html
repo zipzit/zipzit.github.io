@@ -2,223 +2,223 @@
 <html lang="en" class="ui-mobile mdl-js">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <!-- <base href="./index2.html"> -->
-    <!-- <base href="http://127.0.0.1:8080/index2.html"> -->
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <!-- <base href="./index2.html"> -->
+   <!-- <base href="http://127.0.0.1:8080/index2.html"> -->
 
-    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+   <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
 
-    <title>
-        jQuery Mobile Menu Test
-    </title>
+   <title>
+       jQuery Mobile Menu Test
+   </title>
 
-    <meta name="theme-color" content="#cc7a00">
+   <meta name="theme-color" content="#cc7a00">
 
-    <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+   <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+   <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.js"></script>
+   <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 
-    <!-- <script src="https://raw.githubusercontent.com/jquery/demos.jquerymobile.com/master/1.3.2/_assets/js/jqm-demos.js"></script> -->\
-    <!-- https://cdn.jsdelivr.net/gh/jquery/demos.jquerymobile.com@master/1.3.2/_assets/js/jqm-demos.js -->
-    <script src="jqm-demos.js"></script>
-    <!-- <link rel="stylesheet" href="https://raw.githubusercontent.com/jquery/demos.jquerymobile.com/master/1.3.2/_assets/css/jqm-demos.css"> -->
-    <!-- https://cdn.jsdelivr.net/gh/jquery/demos.jquerymobile.com@master/1.3.2/_assets/css/jqm-demos.css -->
-    <link rel="stylesheet" href="jqm-demos.css">
+   <!-- <script src="https://raw.githubusercontent.com/jquery/demos.jquerymobile.com/master/1.3.2/_assets/js/jqm-demos.js"></script> -->\
+   <!-- https://cdn.jsdelivr.net/gh/jquery/demos.jquerymobile.com@master/1.3.2/_assets/js/jqm-demos.js -->
+   <script src="jqm-demos.js"></script>
+   <!-- <link rel="stylesheet" href="https://raw.githubusercontent.com/jquery/demos.jquerymobile.com/master/1.3.2/_assets/css/jqm-demos.css"> -->
+   <!-- https://cdn.jsdelivr.net/gh/jquery/demos.jquerymobile.com@master/1.3.2/_assets/css/jqm-demos.css -->
+   <link rel="stylesheet" href="jqm-demos.css">
 
-    <script type="text/javascript">
-        $(document).on('mobileinit', function(event) {
-            console.log("mobile init here...");
-            //apply overrides here
-            $.mobile.defaultPageTransition = "pop"; // no go here, this function never gets called.
-        });
-    </script>
+   <script type="text/javascript">
+       $(document).on('mobileinit', function(event) {
+           console.log("mobile init here...");
+           //apply overrides here
+           $.mobile.defaultPageTransition = "pop"; // no go here, this function never gets called.
+       });
+   </script>
 
 <body>
-    <div class="container ui-mobile-viewport ui-overlay-a">
+   <div class="container ui-mobile-viewport ui-overlay-a">
 
-        <div data-role="page" id="home-page" class="jqm-demos jqm-home ui-page ui-page-theme-a ui-page-footer-fixed ui-page-active" data-cache="false" data-url="home-page" tabindex="0" style="padding-bottom: 62px;">
-            <div data-role="header" class="jqm-header ui-header ui-bar-inherit" role="banner">
-                <h2 class="ui-title" role="heading" aria-level="1">
-                    <div class="sv_header">My Website</div>
-                </h2>
-                <a href="#" class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all" data-role="button" role="button">Menu</a>
-            </div>
-            <!-- /header -->
-            <div role="main" class="ui-content jqm-content">
-                <h2 style="text-align: center">Main Page</h2>
-                <div id="visitor_note" style="display: block;">
-                    <p> Welcome to our website. Glad you are here.</p>
-                </div>
-            </div>
-            <!-- /content -->
-            <div data-role="panel" class="jqm-navmenu-panel ui-panel ui-panel-position-left ui-panel-display-overlay ui-panel-closed ui-body-a ui-panel-animate" data-position="left" data-display="overlay" data-theme="a" id="home_nav">
-                <div class="ui-panel-inner">
-                    <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
-                        <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
-                        <li data-filtertext="sales"><a href="#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
-                        <li data-filtertext="summary"><a href="#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
-                        <li data-filtertext="team"><a href="#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
-                        <li data-filtertext="report" class="ui-last-child"><a href="#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
-                    </ul>
-                </div>
-            </div>
-            <!-- /panel -->
+       <div data-role="page" id="home-page" class="jqm-demos jqm-home ui-page ui-page-theme-a ui-page-footer-fixed ui-page-active" data-cache="false" data-url="home-page" tabindex="0" style="padding-bottom: 62px;">
+           <div data-role="header" class="jqm-header ui-header ui-bar-inherit" role="banner">
+               <h2 class="ui-title" role="heading" aria-level="1">
+                   <div class="sv_header">My Website</div>
+               </h2>
+               <a href="#" class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all" data-role="button" role="button">Menu</a>
+           </div>
+           <!-- /header -->
+           <div role="main" class="ui-content jqm-content">
+               <h2 style="text-align: center">Main Page</h2>
+               <div id="visitor_note" style="display: block;">
+                   <p> Welcome to our website. Glad you are here.</p>
+               </div>
+           </div>
+           <!-- /content -->
+           <div data-role="panel" class="jqm-navmenu-panel ui-panel ui-panel-position-left ui-panel-display-overlay ui-panel-closed ui-body-a ui-panel-animate" data-position="left" data-display="overlay" data-theme="a" id="home_nav">
+               <div class="ui-panel-inner">
+                   <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
+                       <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
+                       <li data-filtertext="sales"><a href="#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
+                       <li data-filtertext="summary"><a href="#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
+                       <li data-filtertext="team"><a href="#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
+                       <li data-filtertext="report" class="ui-last-child"><a href="#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
+                   </ul>
+               </div>
+           </div>
+           <!-- /panel -->
 
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer ui-footer ui-bar-inherit ui-footer-fixed slideup" role="contentinfo">
-                <p>For Official Use Only</p>
-            </div>
-            <!-- /footer -->
-        </div>
-        <!-- /page -->
+           <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer ui-footer ui-bar-inherit ui-footer-fixed slideup" role="contentinfo">
+               <p>For Official Use Only</p>
+           </div>
+           <!-- /footer -->
+       </div>
+       <!-- /page -->
 
-        <div data-role="page" id="sales" class="jqm-demos jqm-home" data-url="sales">
-            <div data-role="header" class="jqm-header">
-                <h2>
-                    <div class="sv_header">My Website</div>
-                </h2>
-                <a href="/#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
-            </div>
-            <!-- /header -->
-            <div role="main" class="ui-content jqm-content" id="page2_sales"><h2> Sales Content</h2></div>
-            <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" id="sales_nav">
-                <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
-                    <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
-                    <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
-                    <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
-                    <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
-                    <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
-                </ul>
-            </div>
-            <!-- /panel -->
+       <div data-role="page" id="sales" class="jqm-demos jqm-home" data-url="sales">
+           <div data-role="header" class="jqm-header">
+               <h2>
+                   <div class="sv_header">My Website</div>
+               </h2>
+               <a href="#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
+           </div>
+           <!-- /header -->
+           <div role="main" class="ui-content jqm-content" id="page2_sales"><h2> Sales Content</h2></div>
+           <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" id="sales_nav">
+               <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
+                   <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
+                   <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
+                   <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
+                   <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
+                   <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
+               </ul>
+           </div>
+           <!-- /panel -->
 
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
-                <p>For Official Use Only</p>
-            </div>
-            <!-- /footer -->
-        </div>
-        <!-- /page -->
+           <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+               <p>For Official Use Only</p>
+           </div>
+           <!-- /footer -->
+       </div>
+       <!-- /page -->
 
-        <div data-role="page" id="summary" class="jqm-demos jqm-home" data-url="summary">
-            <div data-role="header" class="jqm-header">
-                <h2>
-                    <div class="sv_header">My Website</div>
-                </h2>
-                <a href="/#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
-            </div>
-            <!-- /header -->
-            <div role="main" class="ui-content jqm-content" div id="page3_summary">
-                <h2>Summary content goes here</h2>
-            </div>
-            <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" >
-                <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
-                    <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
-                    <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
-                    <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
-                    <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
-                    <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
-                </ul>
-            </div>
-            <!-- /panel -->
+       <div data-role="page" id="summary" class="jqm-demos jqm-home" data-url="summary">
+           <div data-role="header" class="jqm-header">
+               <h2>
+                   <div class="sv_header">My Website</div>
+               </h2>
+               <a href="#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
+           </div>
+           <!-- /header -->
+           <div role="main" class="ui-content jqm-content" div id="page3_summary">
+               <h2>Summary content goes here</h2>
+           </div>
+           <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" >
+               <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
+                   <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
+                   <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
+                   <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
+                   <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
+                   <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
+               </ul>
+           </div>
+           <!-- /panel -->
 
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
-                <p>For Official Use Only</p>
-            </div>
-            <!-- /footer -->
-        </div>
-        <!-- /page -->
+           <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+               <p>For Official Use Only</p>
+           </div>
+           <!-- /footer -->
+       </div>
+       <!-- /page -->
 
-        <div data-role="page" id="team" class="jqm-demos jqm-home" data-url="team">
-            <div data-role="header" class="jqm-header">
-                <h2>
-                    <div class="sv_header">My Website</div>
-                </h2>
-                <a href="/#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
-            </div>
-            <!-- /header -->
-            <div role="main" class="ui-content jqm-content" id="page4_team">
-                <h2> Yeah Team! </h2>
-            </div>
-            <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" id="team_nav">
-                <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
-                    <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
-                    <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
-                    <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
-                    <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
-                    <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
-                </ul>
-            </div>
-            <!-- /panel -->
+       <div data-role="page" id="team" class="jqm-demos jqm-home" data-url="team">
+           <div data-role="header" class="jqm-header">
+               <h2>
+                   <div class="sv_header">My Website</div>
+               </h2>
+               <a href="#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
+           </div>
+           <!-- /header -->
+           <div role="main" class="ui-content jqm-content" id="page4_team">
+               <h2> Yeah Team! </h2>
+           </div>
+           <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" id="team_nav">
+               <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
+                   <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
+                   <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
+                   <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
+                   <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
+                   <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
+               </ul>
+           </div>
+           <!-- /panel -->
 
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
-                <p>For Official Use Only</p>
-            </div>
-            <!-- /footer -->
-        </div>
-        <!-- /page -->
+           <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+               <p>For Official Use Only</p>
+           </div>
+           <!-- /footer -->
+       </div>
+       <!-- /page -->
 
-        <div data-role="page" id="report" class="jqm-demos jqm-home" data-url="report">
-            <div data-role="header" class="jqm-header">
-                <h2>
-                    <div class="sv_header">My Website</div>
-                </h2>
-                <a href="/#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
-            </div>
-            <!-- /header -->
-            <div id="page5_report">
-                <div role="main" class="ui-content jqm-content">
-                    <form id="report_form" action="#" method="get">
-                        <fieldset class="controlgroup" data-role="controlgroup" data-mini="true">
-                            <legend>Select a report period: </legend>
-                            <input type="radio" name="datepick" id="today" value="today"><label for="today">Today</label>
-                            <input type="radio" name="datepick" id="yesterday" value="yesterday"><label for="yesterday">Yesterday</label>
-                            <input type="radio" name="datepick" id="this_week" value="this_week"><label for="this_week">This
-                                Week</label>
-                            <input type="radio" name="datepick" id="last_week" value="last_week"><label for="last_week">Last
-                                Week</label>
-                            <input type="radio" name="datepick" id="this_month" value="this_month"><label for="this_month">This
-                                Month</label>
-                            <input type="radio" name="datepick" id="last_month" value="last_month"><label for="last_month">Last
-                                Month</label>
-                            <input type="radio" name="datepick" id="custom" value="custom" data-waschecked="true"><label for="custom">Select Date Range Below</label>
-                        </fieldset>
-                        <br>
-                        <!--<div id="startend" style="display:none"> -->
-                        <div id="startend">
-                            Start Date:<input type="date" id="startdate" name="startdate" placeholder="mm/dd/yyyy">
-                            End Date:<input type="date" id="enddate" name="enddate" placeholder="mm/dd/yyyy">
-                        </div>
+       <div data-role="page" id="report" class="jqm-demos jqm-home" data-url="report">
+           <div data-role="header" class="jqm-header">
+               <h2>
+                   <div class="sv_header">My Website</div>
+               </h2>
+               <a href="#" class="jqm-navmenu-link ui-btn ui-btn-icon-notext ui-corner-all ui-icon-bars ui-nodisc-icon ui-alt-icon ui-btn-left">Menu</a>
+           </div>
+           <!-- /header -->
+           <div id="page5_report">
+               <div role="main" class="ui-content jqm-content">
+                   <form id="report_form" action="#" method="get">
+                       <fieldset class="controlgroup" data-role="controlgroup" data-mini="true">
+                           <legend>Select a report period: </legend>
+                           <input type="radio" name="datepick" id="today" value="today"><label for="today">Today</label>
+                           <input type="radio" name="datepick" id="yesterday" value="yesterday"><label for="yesterday">Yesterday</label>
+                           <input type="radio" name="datepick" id="this_week" value="this_week"><label for="this_week">This
+                               Week</label>
+                           <input type="radio" name="datepick" id="last_week" value="last_week"><label for="last_week">Last
+                               Week</label>
+                           <input type="radio" name="datepick" id="this_month" value="this_month"><label for="this_month">This
+                               Month</label>
+                           <input type="radio" name="datepick" id="last_month" value="last_month"><label for="last_month">Last
+                               Month</label>
+                           <input type="radio" name="datepick" id="custom" value="custom" data-waschecked="true"><label for="custom">Select Date Range Below</label>
+                       </fieldset>
+                       <br>
+                       <!--<div id="startend" style="display:none"> -->
+                       <div id="startend">
+                           Start Date:<input type="date" id="startdate" name="startdate" placeholder="mm/dd/yyyy">
+                           End Date:<input type="date" id="enddate" name="enddate" placeholder="mm/dd/yyyy">
+                       </div>
 
-                        <div class="ui-input-btn ui-btn ui-corner-all ui-shadow ui-btn-inline gold_btn">
-                            Generate a Report
-                            <input type="submit" data-enhanced="true" value="">
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" id="report_nav">
-                <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
-                    <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
-                    <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
-                    <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
-                    <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
-                    <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
-                </ul>
-            </div>
-            <!-- /panel -->
+                       <div class="ui-input-btn ui-btn ui-corner-all ui-shadow ui-btn-inline gold_btn">
+                           Generate a Report
+                           <input type="submit" data-enhanced="true" value="">
+                       </div>
+                   </form>
+               </div>
+           </div>
+           <div data-role="panel" class="jqm-navmenu-panel" data-position="left" data-display="overlay" data-theme="a" id="report_nav">
+               <ul class="jqm-list ui-alt-icon ui-nodisc-icon ui-listview">
+                   <li data-filtertext="home" data-icon="home" class="ui-first-child"><a href="/" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-home">Login</a></li>
+                   <li data-filtertext="sales"><a href="/#sales" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Sales</a></li>
+                   <li data-filtertext="summary"><a href="/#summary" data-ajax="false"  class="ui-btn ui-btn-icon-right ui-icon-carat-r">Summary</a></li>
+                   <li data-filtertext="team"><a href="/#team" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Our Team</a></li>
+                   <li data-filtertext="report" class="ui-last-child"><a href="/#report" data-ajax="false" class="ui-btn ui-btn-icon-right ui-icon-carat-r">Reports</a></li>
+               </ul>
+           </div>
+           <!-- /panel -->
 
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
-                <p>For Official Use Only</p>
-            </div>
-            <!-- /footer -->
-        </div>
-        <!-- /page -->
+           <div data-role="footer" data-position="fixed" data-tap-toggle="false" class="jqm-footer">
+               <p>For Official Use Only</p>
+           </div>
+           <!-- /footer -->
+       </div>
+       <!-- /page -->
 
-        <div class="ui-loader ui-corner-all ui-body-a ui-loader-default"><span class="ui-icon-loading"></span>
-            <h1>loading</h1>
-        </div>
-        <div class="ui-panel-dismiss"></div>
-    </div>
-    <!-- end of container-->
+       <div class="ui-loader ui-corner-all ui-body-a ui-loader-default"><span class="ui-icon-loading"></span>
+           <h1>loading</h1>
+       </div>
+       <div class="ui-panel-dismiss"></div>
+   </div>
+   <!-- end of container-->
 
 </body>
 

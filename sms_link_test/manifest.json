@@ -1,0 +1,26 @@
+{
+  "name": "SMS Test",
+  "short_name": "SMS Test",
+  "icons": [
+    {
+      "src": "/icons/apple-icon-180x180.png",
+      "sizes": "120x120",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/icons/android-icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo_540x540.jpg",
+      "sizes": "540x540",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffc116",
+  "theme_color": "#cc7a00"
+}

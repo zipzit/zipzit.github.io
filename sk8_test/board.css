@@ -240,3 +240,31 @@ how to remove the virtical space around the range input in IE*/
 /* .viewButton{
     width: 60px;
 } */
+
+.checkboxes{
+    float: left;
+    color: orange;
+}
+
+.checkboxes input[type=checkbox] {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+.checkboxes input[type=checkbox]:after {
+    content: " ";
+    background-color: orange;
+    display: inline-block;
+    visibility: visible;
+  }
+
+.checkboxes  input[type=checkbox]:checked:after {
+    content: "\2714";
+  }
+
+.checkboxes  input[type=checkbox] {
+    visibility: hidden;
+}

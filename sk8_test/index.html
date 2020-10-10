@@ -1,7 +1,3 @@
-<!-- https://github.com/mrdoob/three.js/ which leads to: https://jsfiddle.net/8kubjpL5/ -->
-<!-- https://threejsfundamentals.org/threejs/lessons/threejs-fundamentals.html -->
-<!-- https://stackoverflow.com/questions/58092014/how-to-change-multiple-views-in-button-click-in-three-js -->
-
 <!-- (done) TTD: Add a reset button (page reload?)
 TTD: (done) Add Modal Info box
 TTD: (done) Add chart to the popup box
@@ -32,10 +28,10 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
     <!-- <script src="./OrbitControls.js"></script> -->
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.module.js" integrity="sha512-zhgQMS7vG+f5CHv6IQ26VllGlG8KulkoNT44jKeYPtyYU0AhGBifWF3IiC7cIumzeVrerdvaw/McehsSGjC7Jw==" crossorigin="anonymous"></script> -->
 
-    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/build/three.js"></script> 
-    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script> 
-    <!-- <script src="./three.js"></script>  -->
-    <!-- <script src="./OrbitControls.js"></script> -->
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/build/three.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script>
+    <!-- <script src="./three.js"></script>
+    <script src="./OrbitControls.js"></script> -->
     <script src="./THREE.MeshLine.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.js"></script>
 
@@ -176,7 +172,47 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
                 camera.position.z = 0;
                 controls.update();
             });
-
+            document.querySelector("#xyz").addEventListener("click", () => {
+                console.log("xyz origin");
+                var xyz = document.getElementById('xyz');
+                if(xyz.checked == false){
+                    xyz.checked ==true;
+                    scene.children.forEach(item => {
+                        if (item.type == "AxesHelper"){
+                            item.visible = false;
+                        }
+                    }) 
+                }
+                if(xyz.checked == true){
+                    xyz.checked ==false;
+                    scene.children.forEach(item => {
+                        if (item.type == "AxesHelper"){
+                            item.visible = true;
+                        }
+                    }) 
+                }
+            });
+            document.querySelector("#grid").addEventListener("click", () => {
+                console.log("grid");
+                var grid = document.getElementById('grid');
+                if(grid.checked == false){
+                    grid.checked ==true;
+                    scene.children.forEach(item => {
+                        if (item.type == "GridHelper"){
+                            item.visible = false;
+                        }
+                    }) 
+                }
+                if(grid.checked == true){
+                    grid.checked ==false;
+                    scene.children.forEach(item => {
+                        if (item.type == "GridHelper"){
+                            item.visible = true;
+                        }
+                    }) 
+                }
+            });
+            
             document.getElementById("slider").addEventListener("input", () => {
                 let newTiltValue = document.getElementById("slider").value;
                 let incrementalTiltValue = newTiltValue - tiltValue;
@@ -328,14 +364,14 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
         }
 
         const tiltTheModel = (deltaTiltValue) => {
-    
+
             return new Promise((resolve, reject) => {
 
                 let boardCenterLineAxis = new THREE.Vector3(0, 0, -1).normalize();  // without the negative sign, the tilt goes in wrong direction.
                 let boardAxisPosition = { x: 0, y: boardElevationY, z: 0 };
                 board.forEach(obj => {
                     rotateAbout(obj, boardCenterLineAxis, boardAxisPosition, THREE.MathUtils.degToRad(deltaTiltValue));
-                    
+
                     obj.children && obj.children.forEach(child => {
                         rotateAbout(child, boardCenterLineAxis, boardAxisPosition, THREE.MathUtils.degToRad(deltaTiltValue));
                     })
@@ -343,7 +379,7 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
 
                 // now lets rotate the axle and wheel assy about the lower end of the hanger ..
                 let axleCenterPosition = truckHangerAxisLine.geometry.vertices[0];
-               
+
                 let hangerPivotAxis = new THREE.Vector3().subVectors(truckHangerAxisLine.geometry.vertices[0], truckHangerAxisLine.geometry.vertices[1]).normalize();
                 // console.log( "Pivot position center: ( ", axleCenterPosition.x.toFixed(2), ", ", axleCenterPosition.y.toFixed(2), ", ", axleCenterPosition.z.toFixed(2) +
                 // ")   Pivot Axis orientation: ( ", hangerPivotAxis.x.toFixed(2), ", ", hangerPivotAxis.y.toFixed(2), ", ", hangerPivotAxis.z.toFixed(2), " )");
@@ -361,7 +397,7 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
 
                     // wheelAxleTempVector = new THREE.Vector3().subVectors(board[3].children[3].geometry.vertices[1], board[3].children[3].geometry.vertices[0]).normalize();
                     wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
-                 
+
                     console.log("before wheelAxleVector: ", wheelAxleTempVector.x.toFixed(5), wheelAxleTempVector.y.toFixed(5), wheelAxleTempVector.z.toFixed(5), " indx: ", i, " increment: ", increment);
                     if (wheelAxleTempVector.y <= 0.005 && wheelAxleTempVector.y >= -0.005) { break };  // was .001, that's too small, sometimes we miss.  
 
@@ -414,7 +450,7 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
             mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(axisPosition.x - mesh.position.x, axisPosition.y - mesh.position.y, axisPosition.z - mesh.position.z));  //translate geometry back to original location
             mesh.matrix.identity();
         }
-        
+
         const rotateAboutQuaternion = (mesh, axis, axisPosition, angle) => {
             // from https://stackoverflow.com/a/32038265/2487730     not sure why it fails... 
             axis.normalize();
@@ -513,13 +549,23 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
 
     </script>
     <script src="./THREE.MeshLine.js"></script>
+    <div class="checkboxes">
 
-    <button id="frontView" class="viewButton">Front View</button>
-    <button id="sideView" class="viewButton">Side View</button>
-    <button id="topView" class="viewButton">Top View</button>
-    <button id="skewedView" class="viewButton">Angled View</button>
-    <button id="info" class="viewButton">Info / Graph</button>
-    <button id="reset" class="viewButton">Reset</button>
+        <button id="frontView" class="viewButton">Front View</button>
+        <button id="sideView" class="viewButton">Side View</button>
+        <button id="topView" class="viewButton">Top View</button>
+        <button id="skewedView" class="viewButton">Angled View</button>
+        <button id="info" class="viewButton">Info / Graph</button>
+        <button id="reset" class="viewButton">Reset</button>
+        <div style="clear: both;"></div>
+        <div class="checkboxes">
+            <input type="checkbox" id="xyz" name="xyz" checked>
+            <label for="xyz"> XYZ Origin Visible? </label>
+            <input type="checkbox" id="grid" name="grid" checked>
+            <label for="grid"> Grid Visible? </label>
+        </div>
+    </div>
+
     <div class="buttonContainer">
         <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=-25.0 max=25.1
                 value="0.0" step="0.25" id="slider" orient="horizontal"> <span id="tilt">Board Tilt° </span></div>

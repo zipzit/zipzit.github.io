@@ -1,0 +1,556 @@
+<!-- https://github.com/mrdoob/three.js/ which leads to: https://jsfiddle.net/8kubjpL5/ -->
+<!-- https://threejsfundamentals.org/threejs/lessons/threejs-fundamentals.html -->
+<!-- https://stackoverflow.com/questions/58092014/how-to-change-multiple-views-in-button-click-in-three-js -->
+
+<!-- (done) TTD: Add a reset button (page reload?)
+TTD: (done) Add Modal Info box
+TTD: (done) Add chart to the popup box
+TTD: Add a variable rake offset via slider (zero to 12mm)
+TTD: Make hanger angle variable from 70 down to 30 degrees
+TTD: Orthographic camera doesn't work.  You get a blank screen.  
+TTD: Add a way to plot / download output.  CSV?  XY Plot? 
+TTD: Improve the axle flattening algorithm, lose the break operator
+TTD: What is the Y height of the axle after each board tilt?  Does that number change? 
+TTD: Add checkboxes for helper visibility (grid and origin)     mesh.visible = true or false... 
+TTD: Make board height an input?
+TTD: Figure out axis of board rotation. Is that the center of the board, the top or bottom of the board? dunno.  What represents reality?
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Skateboard Truck Test</title>
+    <link rel="stylesheet" href="./board.css" type="text/css">
+    <link href="modal.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.js"></script> -->
+    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three-orbitcontrols@2.110.3/OrbitControls.js"></script> -->
+    <!-- <script src="./OrbitControls.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.module.js" integrity="sha512-zhgQMS7vG+f5CHv6IQ26VllGlG8KulkoNT44jKeYPtyYU0AhGBifWF3IiC7cIumzeVrerdvaw/McehsSGjC7Jw==" crossorigin="anonymous"></script> -->
+
+    <!-- <script src="https://cdn.rawgit.com/mrdoob/three.js/master/build/three.js"></script> -->
+    <!-- <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script> -->
+    <script src="./three.js"></script>
+    <script src="./OrbitControls.js"></script>
+    <script src="./THREE.MeshLine.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.js"></script>
+
+    <script>
+        // import * as THREE from "./three.js";
+        // <script type="module">
+        //     import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.module.js";
+
+        function autorun() {
+            initLightsCameraScene();
+            initSkateboard();
+            animate();
+            console.log("scene: ", scene)
+            PrepRussianData();
+            ctx = document.getElementById('myChart').getContext('2d');
+        }
+
+        // declare global variables
+        var camera, scene, renderer, controls;
+        var leftWheelGeometry,
+            rightWheelGeometry,
+            axleGeometry,
+            boardFrontGeometry,
+            boardMiddleGeometry,
+            truckRotationAxis,
+            material,
+            board,
+            cylinder,
+            truckHangerAxisLine,
+            ctx,
+            wheelsAndAxle,
+            mesh;
+        let tiltValue = 0.0;
+        let hangerAxisAngle = 45;
+        let boardTiltMax = 25;
+        let rakeDimension = 0;
+        const orthoview = false;
+        const boardElevationY = 130 - 75 / 2;  // my board height with 75mm wheels is 130mm
+        const boardTiltAxis = {};
+        var kkRussianData = [{}];
+        var modelData = [{}];
+
+        const PrepRussianData = () => {
+
+            kkRussianData = [{}];
+
+            let RussianAngles = (deckTilt, hangerAxis) => Math.atan(Math.sin(deckTilt) * Math.tan(hangerAxis));
+
+            for (var i = 0; i <= 25.0; i += 0.25) {
+                var tempObj = {};
+                tempObj.x = i.toFixed(2);
+                tempObj.y = THREE.MathUtils.radToDeg(RussianAngles(THREE.MathUtils.degToRad(i), THREE.MathUtils.degToRad(hangerAxisAngle))).toFixed(2);
+                kkRussianData.push(tempObj);
+            }
+        }
+
+
+        function initLightsCameraScene() {
+            if (orthoview) {
+                camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2);
+            } else {
+                camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 2000);
+                camera.position.y = 75;
+                camera.position.z = 500;
+            }
+
+            scene = new THREE.Scene();
+
+            var light1 = new THREE.DirectionalLight(0xffffff, 0.3);
+            light1.position.set(200, 252, 400).normalize();
+            scene.add(light1);
+            var light2 = new THREE.DirectionalLight(0xffffff);
+            light2.position.set(0, -10, 1).normalize();
+            scene.add(light2);
+            var light3 = new THREE.AmbientLight(0xffffff, .7);
+            scene.add(light3);
+
+            scene.add(new THREE.AxesHelper(300));  // x = red, y = green, z = blue
+
+            var helper = new THREE.GridHelper(500, 50);   // (size, # of divisions)
+            helper.position.y = -75 / 2;
+            helper.name = "ground";
+            scene.add(helper);
+
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight - 150);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+
+            document.querySelector("#reset").addEventListener("click", () => {
+                console.log("reset");
+                location.reload();
+            });
+            document.querySelector("#info").addEventListener("click", () => {
+                console.log("info");
+                analyseTheWholeModel();
+                addAChart(hangerAxisAngle, rakeDimension);
+                document.getElementById("myModal").style.display = "block";
+            });
+            document.querySelector(".close").addEventListener("click", () => {
+                console.log("close modal");
+                document.getElementById("myModal").style.display = "none";
+            })
+            window.onclick = function (event) {
+                if (event.target == document.getElementById("myModal")) {
+                    document.getElementById("myModal").style.display = "none";
+                }
+            }
+            document.querySelector("#frontView").addEventListener("click", () => {
+                console.log("front view");
+                camera.position.x = 0;
+                camera.position.y = 75;
+                camera.position.z = 500;
+                controls.update();
+            });
+
+            document.querySelector("#sideView").addEventListener("click", () => {
+                console.log("Side View");
+                camera.position.x = 500;
+                camera.position.y = -75 / 2;   // wheel axle centerline = 0, ground= -75/2?
+                camera.position.z = 0;
+                controls.update();
+            });
+            document.querySelector("#skewedView").addEventListener("click", () => {
+                console.log("Angled View");
+                camera.position.x = 500;
+                camera.position.y = 500;
+                camera.position.z = 500;
+                controls.update();
+            });
+
+            document.querySelector("#topView").addEventListener("click", () => {
+                console.log("Top View");
+                camera.position.x = 0;
+                camera.position.y = 500;
+                camera.position.z = 0;
+                controls.update();
+            });
+
+            document.getElementById("slider").addEventListener("input", () => {
+                let newTiltValue = document.getElementById("slider").value;
+                let incrementalTiltValue = newTiltValue - tiltValue;
+                tiltValue = newTiltValue;
+                document.getElementById("tilt").textContent = "Board Tilt: " + tiltValue + "° ";
+                // console.log("tilt the model - Tilt Amount:", tiltValue, "  Axle Direction: ", tiltTheModel(incrementalTiltValue));
+                tiltTheModel(incrementalTiltValue);
+            })
+
+            document.getElementById("hangerAngleSlider").addEventListener("input", () => {
+                let newHangerAngleValue = document.getElementById("hangerAngleSlider").value;
+                hangerAxisAngle = newHangerAngleValue;
+                document.getElementById("hangerAngle").textContent = "Hanger Axis: " + newHangerAngleValue + "° ";
+                removeSkateboard();
+                removeSkateboard();  // something is odd here... first time thru the mesh doesn't delete? 
+                PrepRussianData();
+                initSkateboard();
+                animate();
+            })
+
+            document.getElementById("rakeSlider").addEventListener("input", () => {
+                let newRakeValue = document.getElementById("rakeSlider").value;
+                rakeDimension = newRakeValue;
+                document.getElementById("rake").textContent = "Rake: " + newRakeValue + " mm";
+                removeSkateboard();
+                removeSkateboard();  // something is odd here... first time thru the mesh doesn't delete? 
+                removeSkateboard();
+                PrepRussianData();
+                initSkateboard();
+                animate();
+            })
+        }
+
+        function removeSkateboard() {
+            scene.children.forEach(element => {
+                if (element.type == "Line") scene.remove(element);
+                if (element.type == "Mesh") scene.remove(element);
+            })
+            // reset board tilt back to zero
+            tiltValue = 0.0;
+            document.getElementById("slider").value = 0.0;
+            document.getElementById("tilt").textContent = "Board Tilt: " + tiltValue + "° ";
+            wheelsAndAxle = []
+            board = []
+            // animate();
+        }
+
+        function initSkateboard() {
+
+            leftWheelGeometry = new THREE.CylinderGeometry(37.5, 37.5, 50.0, 40);
+            leftWheelGeometry.rotateZ(THREE.MathUtils.degToRad(90.0)).translate(-80, 0, 0)
+            rightWheelGeometry = new THREE.CylinderGeometry(37.5, 37.5, 50.0, 40);
+            rightWheelGeometry.rotateZ(THREE.MathUtils.degToRad(90.0)).translate(80, 0, 0)
+            axleGeometry = new THREE.CylinderGeometry(4, 4, 221.0, 40);
+            axleGeometry.rotateZ(THREE.MathUtils.degToRad(90.0));
+
+            // idea: can we prelocate the truck hanger rotation axis cylinder?, instead of doing that in the makeInstance function?
+
+            //create a red LineBasicMaterial (or dashed!)
+            var lineMaterial = new THREE.LineDashedMaterial({ color: "red", linewidth: 10, scale: 1, dashSize: 5, gapSize: 5 });
+
+            var hangerAxisPoints = [];
+            // need to figure out hanger tilt right here... 
+            // start point = 0,0,0 and end point is 0,BoardHeightY,z
+            var tempzzz = boardElevationY / Math.tan(THREE.MathUtils.degToRad(hangerAxisAngle));
+            var tempLength = boardElevationY / Math.sin(THREE.MathUtils.degToRad(hangerAxisAngle));
+            // console.log("boardElevationY: ", boardElevationY);
+            console.log("hangerAxisAngle: ", hangerAxisAngle, "tangent: ", Math.tan(THREE.MathUtils.degToRad(hangerAxisAngle)), "tempzzz: ", tempzzz);
+
+            // rake? Remember Rake is measured perpendicular to the truck axis of rotation
+            // We want to use the Z displacement in lieu of perpendicular length?
+            // we shift the pivot in the Z direction forward or aft to accomplish that.  
+            var tempRakeAngle = 90 - hangerAxisAngle;
+            var rakeHypotenuse = rakeDimension / Math.cos(THREE.MathUtils.degToRad(tempRakeAngle))
+            console.log("rakeDimension: ", rakeDimension, " tempRakeAngle: ", tempRakeAngle, "rakeHpotenuse: ", rakeHypotenuse);
+
+            hangerAxisPoints.push(new THREE.Vector3(0, 0, rakeHypotenuse));
+            hangerAxisPoints.push(new THREE.Vector3(0, boardElevationY, tempzzz + rakeHypotenuse));
+            truckHangerAxisLineGeometry = new THREE.Geometry().setFromPoints(hangerAxisPoints);
+            truckHangerAxisLine = new THREE.Line(truckHangerAxisLineGeometry, lineMaterial);
+            truckHangerAxisLine.computeLineDistances();  // calculate the dashes in the dashed line
+            truckHangerAxisLine.name = "hanger pivot axis LINE";
+            scene.add(truckHangerAxisLine);
+
+            truckHangerRotationAxis = new THREE.CylinderGeometry(3, 3, tempLength, 20);   // when created, part is vertical
+            truckHangerRotationAxis.rotateX(THREE.MathUtils.degToRad(90 - hangerAxisAngle))
+            truckHangerRotationAxis.translate(0, (hangerAxisPoints[1].y - hangerAxisPoints[0].y) / 2, (hangerAxisPoints[1].z - hangerAxisPoints[0].z) / 2 + rakeHypotenuse)
+
+            // Add Green cylinder for rake offset 
+            // if rakeoffset is positive, if rakeoffset is negative?
+            truckHangerRakeOffset = new THREE.CylinderGeometry(3, 3, rakeHypotenuse, 20)  // dia, dia, length, # of segments
+            truckHangerRakeOffset.rotateX(THREE.MathUtils.degToRad(90)).translate(0, 0, rakeHypotenuse / 2);
+
+            var lineMaterial2 = new THREE.LineDashedMaterial({ color: "blue", linewidth: 10, scale: 1, dashSize: 5, gapSize: 5 });
+            var points2 = [];
+            points2.push(new THREE.Vector3(-200, 0, 0));
+            points2.push(new THREE.Vector3(200, 0, 0));
+            axleAxisLineGeometry = new THREE.Geometry().setFromPoints(points2);
+            axleAxisLine = new THREE.Line(axleAxisLineGeometry, lineMaterial2);
+            axleAxisLine.computeLineDistances();  // calculate the dashes in the dashed line
+            axleAxisLine.name = "axle axis LINE";
+            scene.add(axleAxisLine);
+
+            // Create a 2D board shape
+            // The Shape() class has methods for drawing a 2D shape
+            var boardShape = new THREE.Shape();
+            boardShape.moveTo(0, 115);
+            boardShape.lineTo(-100, 80);
+            boardShape.lineTo(-115, 30);
+            boardShape.lineTo(-115, -30);
+            boardShape.lineTo(-100, -80);
+            boardShape.lineTo(0, -115);
+            boardShape.lineTo(500, -115);
+            boardShape.lineTo(500, 115);
+            boardShape.moveTo(0, 115);
+            var extrudedBoard = new THREE.ExtrudeGeometry(boardShape, { amount: 8, bevelEnabled: true, bevelSize: 5, bevelThickness: 5 })
+            extrudedBoard.rotateX(THREE.MathUtils.degToRad(90)).rotateY(THREE.MathUtils.degToRad(90));
+            extrudedBoard.translate(0, boardElevationY, 50);  // move board forward to accomodate extra rake
+
+            function makeInstance(obj) {
+                if (obj.transparent) {
+                    material = new THREE.MeshPhongMaterial({ color: obj.colorValue, opacity: 0.4, transparent: true });
+                } else {
+                    material = new THREE.MeshPhongMaterial({ color: obj.colorValue, flatShading: true });
+                }
+                mesh = new THREE.Mesh(obj.geo, material);
+                scene.add(mesh);
+                mesh.name = obj.name;
+                return mesh;
+            }
+
+            wheelsAndAxle = [
+                makeInstance({ geo: leftWheelGeometry, colorValue: "orange", x: 0, y: 0, z: 0, name: "left wheel", xRot: 0, yRot: 0, zRot: 0, transparent: false }),
+                makeInstance({ geo: rightWheelGeometry, colorValue: "orange", x: 0, y: 0, z: 0, name: "right wheel", xRot: 0, yRot: 0, zRot: 0, transparent: false }),
+                makeInstance({ geo: axleGeometry, colorValue: "blue", x: 0, y: 0, z: 0, name: "axle", xRot: 0, yRot: 0, zRot: 0, transparent: false }),
+                makeInstance({ geo: truckHangerRakeOffset, colorValue: "green", x: 0, y: 0, z: 0, name: "rake offset mount", xRot: 0, yRot: 0, zRot: 0, transparent: false })
+            ];
+            wheelsAndAxle.push(axleAxisLine);
+
+            board = [
+                makeInstance({ geo: extrudedBoard, colorValue: "dodgerblue", x: 0, y: boardElevationY, z: 0, name: "skateboard deck", xRot: 0, yRot: 0, zRot: 0, transparent: true }),
+                makeInstance({ geo: truckHangerRotationAxis, colorValue: "red", x: 0, y: 0, z: 0, name: "hanger pivot axis MESH", xRot: 0, yRot: 0, zRot: 0, transparent: false }),
+            ];
+            board.push(truckHangerAxisLine)
+
+            wheelsAndAxle.forEach(obj => {
+                truckHangerAxisLine.add(obj);
+            })
+        }
+
+        const tiltTheModel = (deltaTiltValue) => {
+            // tilt the board an incremental angle from its current position
+            // return axle heading in plan view, 0deg = straight ahead
+            return new Promise((resolve, reject) => {
+
+                let boardCenterLineAxis = new THREE.Vector3(0, 0, -1).normalize();  // without the negative sign, the tilt goes in wrong direction.
+                let boardAxisPosition = { x: 0, y: boardElevationY, z: 0 };
+                board.forEach(obj => {
+                    rotateAbout(obj, boardCenterLineAxis, boardAxisPosition, THREE.MathUtils.degToRad(deltaTiltValue));
+                    // oops.  there is a rotation AND a translation require here... 
+                    // I need to make wheels and axle a child of the pivot axis... 
+                    // this is sort of clumsy.. this could have been a recursive function , per rotating planets / moon / satellites example
+                    obj.children && obj.children.forEach(child => {
+                        rotateAbout(child, boardCenterLineAxis, boardAxisPosition, THREE.MathUtils.degToRad(deltaTiltValue));
+                    })
+                })
+
+                // now lets rotate the axle and wheel assy..
+                let axleCenterPosition = board[2].geometry.vertices[0];
+                // create a direction vector from two vertices?
+                // let axlePivotAxis = new THREE.Vector3().subVectors(board[3].geometry.vertices[0], board[3].geometry.vertices[1]).normalize();
+                let axlePivotAxis = new THREE.Vector3().subVectors(truckHangerAxisLine.geometry.vertices[0], truckHangerAxisLine.geometry.vertices[1]).normalize();
+                // console.log( "Pivot position center: ( ", axleCenterPosition.x.toFixed(2), ", ", axleCenterPosition.y.toFixed(2), ", ", axleCenterPosition.z.toFixed(2) +
+                // ")   Pivot Axis orientation: ( ", axlePivotAxis.x.toFixed(2), ", ", axlePivotAxis.y.toFixed(2), ", ", axlePivotAxis.z.toFixed(2), " )");
+
+                // need to figure out an axle leveling schema, perhaps try a big number then sample horizontal angle, 
+                // when the axle is level, the direction vector Y value will be zero.  
+                // console.log("board: ", board)
+
+                // console.log("wheelAxleTempVector: ", wheelAxleTempVector);
+                // console.log("XAxisVector: ", XAxisVector);
+
+                let wheelAxleTempVector = new THREE.Vector3();
+                var increment;
+                deltaTiltValue > 1 ? increment = 0.01 : increment = -0.01;
+
+                // rotate the hanger until the wheel axis is "level" with the ground.  
+                // TTD: This convergence model below is a total hack, and really needs a review and rewrite
+                // for loop , break, really?  sigh... 
+                for (var i = 0; i <= 5000; i++) {
+                    // use axle axis line, no matter where it is?  its not clear on how these children are setup.  
+                    // wheelAxleTempVector = new THREE.Vector3().subVectors(board[3].children[3].geometry.vertices[1], board[3].children[3].geometry.vertices[0]).normalize();
+                    wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0].normalize());
+                    // console.log("temp direction Y value: ", wheelAxleTempVector.y, " index: ", i)
+                    console.log("wheelAxleTempVector: ", wheelAxleTempVector.x.toFixed(5), wheelAxleTempVector.y.toFixed(5), wheelAxleTempVector.z.toFixed(5), " index: ", i)
+                    if (wheelAxleTempVector.y <= 0.5 && wheelAxleTempVector.y >= -0.5) { break };  // was .001, that's too small, sometimes we miss.  
+
+                    wheelsAndAxle.forEach(obj => {
+                        rotateAbout(obj, axlePivotAxis, axleCenterPosition, increment);
+                    })
+                }
+
+                wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0].normalize());
+                // wheelAxleTempVector = new THREE.Vector3().subVectors(board[3].children[3].geometry.vertices[1], board[3].children[3].geometry.vertices[0]).normalize();
+                let XAxisVector = new THREE.Vector3(1, 0, 0)
+                let angleBetweenAxleAndXAxis = wheelAxleTempVector.angleTo(XAxisVector);
+                // console.log("AngleBetweenAxleAndXAxis: ", THREE.MathUtils.radToDeg(angleBetweenAxleAndXAxis), " degrees");
+                // console.log("board, after rotation: ", board);
+                var result = (THREE.MathUtils.radToDeg(angleBetweenAxleAndXAxis)).toFixed(4);
+                if (result) {
+                    resolve(result)
+                }
+                else {
+                    reject('oops, something went wrong');
+                }
+            })
+
+        }
+
+        //rotates a mesh's geometry about a specified axis and pivot
+        //the axis is a normalized Vector3   S.O. 12746011
+        const rotateAbout = (mesh, axis, axisPosition, angle) => {
+            mesh.updateMatrix();
+            mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(mesh.position.x - axisPosition.x, mesh.position.y - axisPosition.y, mesh.position.z - axisPosition.z));  //translate geometry to axis location
+            mesh.geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));    //rotate geometry about axis
+            mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(axisPosition.x - mesh.position.x, axisPosition.y - mesh.position.y, axisPosition.z - mesh.position.z));  //translate geometry back to original location
+            mesh.matrix.identity();
+        }
+
+        const addAChart = (tilt, rake) => {
+            var myChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    labels: ['Board Tilt / Truck Direction'],
+                    datasets: [{
+                        label: 'Russian Tilt Calculation',
+                        data: kkRussianData,
+                        borderColor: "black",
+                        pointBackgroundColor: 'black',
+                        fill: true
+                    }, {
+                        label: 'Model Observations, rake dimension: ' + rake + ' mm',
+                        data: modelData,
+                        borderColor: "orange",
+                        pointBackgroundColor: "orange",
+                        fill: true
+                    }
+                    ],
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Board Tilt / Axle Direction - Truck Tilt: ' + tilt + '° '
+                    },
+                    scales: {
+                        xAxes: [{
+                            type: 'linear',
+                            position: 'bottom',
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Board Tilt"
+                            }
+                        }],
+                        yAxes: [{
+                            type: 'linear',
+                            position: 'left',
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Axle Direction"
+                            }
+                        }]
+                    }
+
+                }
+            });
+            // console.log("MyChart: ", myChart)
+            myChart.config.options.elements.point.radius = 2;
+        }
+
+        const analyseTheWholeModel = async () => {
+            // put the model back to zero.
+            console.log("tilt the model from ", tiltValue, " back to zero", tiltTheModel(-tiltValue));
+            document.getElementById("tilt").textContent = "Board Tilt: " + 0.0 + "° ";
+
+            var axisHeading, incrementalTV, previousTV, tempObj, tiltMe;
+            previousTV = 0;
+            modelData = [];
+
+            for (tiltMe = 0.0; tiltMe < 25.0; tiltMe += 0.25) {
+                //update the slider position and value display to match the graphics on screen.  
+                document.getElementById("slider").value = tiltMe;
+                document.getElementById("tilt").textContent = "Board Tilt: " + tiltMe + "° ";
+                incrementalTV = tiltMe - previousTV;
+                axisHeading = await tiltTheModel(incrementalTV);
+                tempObj = { x: tiltMe, y: axisHeading };
+                modelData.push(tempObj);
+                previousTV = tiltMe;
+                // console.log("----------------------------------------------", tiltMe);
+            }
+            tiltValue = tiltMe
+            // console.log("modelData: ",  modelData);
+        }
+
+        if (window.addEventListener) window.addEventListener("load", autorun, false);
+        else if (window.attachEvent) window.attachEvent("onload", autorun);
+        else window.onload = autorun;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+    </script>
+    <script src="./THREE.MeshLine.js"></script>
+
+    <button id="frontView" class="viewButton">Front View</button>
+    <button id="sideView" class="viewButton">Side View</button>
+    <button id="topView" class="viewButton">Top View</button>
+    <button id="skewedView" class="viewButton">Angled View</button>
+    <button id="info" class="viewButton">Info / Graph</button>
+    <button id="reset" class="viewButton">Reset</button>
+    <div class="buttonContainer">
+        <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=-25.0 max=25.1
+                value="0.0" step="0.25" id="slider" orient="horizontal"> <span id="tilt">Board Tilt° </span></div>
+        <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=15.0 max=75.1
+                value="45.0" step="5.0" id="hangerAngleSlider" orient="horizontal"> <span id="hangerAngle">Hanger Axis:
+                45° </span></div>
+        <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=-5.0 max=30.1
+                value="0" step="5.0" id="rakeSlider" orient="horizontal"> <span id="rake">Rake: 0 mm </span></div>
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>Skateboard Truck Analysis Tool</h2>
+            </div>
+            <div class="modal-body">
+                <p>This model was built to better understand the dynamics of a turning skateboard truck. You can tilt
+                    the skateboard, and determine different outputs for a given truck hanger angle, and rake (axle
+                    offset to hanger pivot axis). </p>
+                <ul>
+                    <li>The model does not consider wheel bite, the range of motion of each truck or other
+                        interferences. </li>
+                    <li>This is a math model to show functional concepts.</li>
+                    <li>Axle direction is zero when board is pointing straight ahead.</li>
+                    <li>Note, we're actually moving the math model to obtain values in the chart below; occasionally the
+                        model gets out of sync. Graph data shows as 180° - value. (Gimbal lock...) If that happens, just
+                        reload/reset the page and try again. </li>
+                    <li>Model uses 75mm wheels, board height of 130mm (assuming 12.5mm extra riser to prevent wheel
+                        bite)</li>
+                </ul>
+                <p>Thanks for visiting! </p>
+
+                <div class="chart">
+                    <!-- <canvas id="myChart" ></canvas> -->
+                    <canvas id="myChart" width="300" height="150"></canvas>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <h3>This model created by the folks at <a href="https://dogfeatherdesign.com">Dog Feather design...</a>
+                </h3>
+            </div>
+        </div>
+
+    </div>
+    <div style="position: absolute; z-index: 99; font-size: 90px; color: orange;  opacity: 0.5;
+    top: 50%;    left: 50%;    margin-right: -50%;    transform: translate(-50%, -50%) rotate(-30deg);;"   >
+        Work in Progress!</div>
+
+</body>
+
+</html>
+
+</body>
+
+</html>

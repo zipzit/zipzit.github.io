@@ -5,14 +5,14 @@
 <!-- (done) TTD: Add a reset button (page reload?)
 TTD: (done) Add Modal Info box
 TTD: (done) Add chart to the popup box
-TTD: Add a variable rake offset via slider (zero to 12mm)
-TTD: Make hanger angle variable from 70 down to 30 degrees
+TTD: (done) Add a variable rake offset via slider (zero to 12mm)
+TTD: (done) Make hanger angle variable from 70 down to 30 degrees
 TTD: Orthographic camera doesn't work.  You get a blank screen.  
 TTD: Add a way to plot / download output.  CSV?  XY Plot? 
 TTD: Improve the axle flattening algorithm, lose the break operator
 TTD: What is the Y height of the axle after each board tilt?  Does that number change? 
 TTD: Add checkboxes for helper visibility (grid and origin)     mesh.visible = true or false... 
-TTD: Make board height an input?
+TTD: Make board height a variable input?
 TTD: Figure out axis of board rotation. Is that the center of the board, the top or bottom of the board? dunno.  What represents reality?
 -->
 
@@ -32,10 +32,10 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
     <!-- <script src="./OrbitControls.js"></script> -->
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.module.js" integrity="sha512-zhgQMS7vG+f5CHv6IQ26VllGlG8KulkoNT44jKeYPtyYU0AhGBifWF3IiC7cIumzeVrerdvaw/McehsSGjC7Jw==" crossorigin="anonymous"></script> -->
 
-    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/build/three.js"></script> 
-     <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script>
-   <!-- <script src="./three.js"></script> -->
-   <!-- <script src="./OrbitControls.js"></script> -->
+    <!-- <script src="https://cdn.rawgit.com/mrdoob/three.js/master/build/three.js"></script> -->
+    <!-- <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script> -->
+    <script src="./three.js"></script>
+    <script src="./OrbitControls.js"></script>
     <script src="./THREE.MeshLine.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.js"></script>
 
@@ -91,7 +91,6 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
                 kkRussianData.push(tempObj);
             }
         }
-
 
         function initLightsCameraScene() {
             if (orthoview) {
@@ -329,62 +328,72 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
         }
 
         const tiltTheModel = (deltaTiltValue) => {
-            // tilt the board an incremental angle from its current position
-            // return axle heading in plan view, 0deg = straight ahead
+    
             return new Promise((resolve, reject) => {
 
                 let boardCenterLineAxis = new THREE.Vector3(0, 0, -1).normalize();  // without the negative sign, the tilt goes in wrong direction.
                 let boardAxisPosition = { x: 0, y: boardElevationY, z: 0 };
                 board.forEach(obj => {
                     rotateAbout(obj, boardCenterLineAxis, boardAxisPosition, THREE.MathUtils.degToRad(deltaTiltValue));
-                    // oops.  there is a rotation AND a translation require here... 
-                    // I need to make wheels and axle a child of the pivot axis... 
-                    // this is sort of clumsy.. this could have been a recursive function , per rotating planets / moon / satellites example
+                    
                     obj.children && obj.children.forEach(child => {
                         rotateAbout(child, boardCenterLineAxis, boardAxisPosition, THREE.MathUtils.degToRad(deltaTiltValue));
                     })
                 })
 
-                // now lets rotate the axle and wheel assy..
-                let axleCenterPosition = board[2].geometry.vertices[0];
-                // create a direction vector from two vertices?
-                // let axlePivotAxis = new THREE.Vector3().subVectors(board[3].geometry.vertices[0], board[3].geometry.vertices[1]).normalize();
-                let axlePivotAxis = new THREE.Vector3().subVectors(truckHangerAxisLine.geometry.vertices[0], truckHangerAxisLine.geometry.vertices[1]).normalize();
+                // now lets rotate the axle and wheel assy about the lower end of the hanger ..
+                let axleCenterPosition = truckHangerAxisLine.geometry.vertices[0];
+               
+                let hangerPivotAxis = new THREE.Vector3().subVectors(truckHangerAxisLine.geometry.vertices[0], truckHangerAxisLine.geometry.vertices[1]).normalize();
                 // console.log( "Pivot position center: ( ", axleCenterPosition.x.toFixed(2), ", ", axleCenterPosition.y.toFixed(2), ", ", axleCenterPosition.z.toFixed(2) +
-                // ")   Pivot Axis orientation: ( ", axlePivotAxis.x.toFixed(2), ", ", axlePivotAxis.y.toFixed(2), ", ", axlePivotAxis.z.toFixed(2), " )");
+                // ")   Pivot Axis orientation: ( ", hangerPivotAxis.x.toFixed(2), ", ", hangerPivotAxis.y.toFixed(2), ", ", hangerPivotAxis.z.toFixed(2), " )");
 
                 // need to figure out an axle leveling schema, perhaps try a big number then sample horizontal angle, 
                 // when the axle is level, the direction vector Y value will be zero.  
-                // console.log("board: ", board)
-
-                // console.log("wheelAxleTempVector: ", wheelAxleTempVector);
-                // console.log("XAxisVector: ", XAxisVector);
 
                 let wheelAxleTempVector = new THREE.Vector3();
+                let wheelAxleTempVector2 = new THREE.Vector3();
+
                 var increment;
                 deltaTiltValue > 1 ? increment = 0.01 : increment = -0.01;
 
-                // rotate the hanger until the wheel axis is "level" with the ground.  
-                // TTD: This convergence model below is a total hack, and really needs a review and rewrite
-                // for loop , break, really?  sigh... 
                 for (var i = 0; i <= 5000; i++) {
-                    // use axle axis line, no matter where it is?  its not clear on how these children are setup.  
+
                     // wheelAxleTempVector = new THREE.Vector3().subVectors(board[3].children[3].geometry.vertices[1], board[3].children[3].geometry.vertices[0]).normalize();
-                    wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0].normalize());
-                    // console.log("temp direction Y value: ", wheelAxleTempVector.y, " index: ", i)
-                    console.log("wheelAxleTempVector: ", wheelAxleTempVector.x.toFixed(5), wheelAxleTempVector.y.toFixed(5), wheelAxleTempVector.z.toFixed(5), " index: ", i)
-                    if (wheelAxleTempVector.y <= 0.5 && wheelAxleTempVector.y >= -0.5) { break };  // was .001, that's too small, sometimes we miss.  
+                    wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
+                 
+                    console.log("before wheelAxleVector: ", wheelAxleTempVector.x.toFixed(5), wheelAxleTempVector.y.toFixed(5), wheelAxleTempVector.z.toFixed(5), " indx: ", i, " increment: ", increment);
+                    if (wheelAxleTempVector.y <= 0.005 && wheelAxleTempVector.y >= -0.005) { break };  // was .001, that's too small, sometimes we miss.  
 
                     wheelsAndAxle.forEach(obj => {
-                        rotateAbout(obj, axlePivotAxis, axleCenterPosition, increment);
+                        rotateAbout(obj, hangerPivotAxis, axleCenterPosition, increment);
+                        // rotateAboutQuaternion(obj, hangerPivotAxis, axleCenterPosition, increment);   // fails... 
                     })
-                }
 
-                wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0].normalize());
-                // wheelAxleTempVector = new THREE.Vector3().subVectors(board[3].children[3].geometry.vertices[1], board[3].children[3].geometry.vertices[0]).normalize();
+                    wheelAxleTempVector2 = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
+                    // console.log("after wheelAxleVector2: ", wheelAxleTempVector2.x.toFixed(5), wheelAxleTempVector2.y.toFixed(5), wheelAxleTempVector2.z.toFixed(5));
+
+                    // if (wheelAxleTempVector2.y >= wheelAxleTempVector.y) {
+                    //     // if (increment < 0) increment *= 1;
+                    //     increment = Math.abs(increment) * -1;    // positive increments make Y value smaller
+                    // }
+                    // else {
+                    //     // if (increment > 0) increment *= 1;
+                    //     increment = Math.abs(increment) //* -1;
+                    // }
+
+                    if (Math.abs(wheelAxleTempVector2.y) < 0.01) {
+                        if (increment < 0)
+                            increment = -0.005;
+                        else {
+                            increment = 0.005;
+                        }
+                    }
+                }
+                wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
                 let XAxisVector = new THREE.Vector3(1, 0, 0)
                 let angleBetweenAxleAndXAxis = wheelAxleTempVector.angleTo(XAxisVector);
-                // console.log("AngleBetweenAxleAndXAxis: ", THREE.MathUtils.radToDeg(angleBetweenAxleAndXAxis), " degrees");
+                console.log("AngleBetweenAxleAndXAxis: ", THREE.MathUtils.radToDeg(angleBetweenAxleAndXAxis), " degrees");
                 // console.log("board, after rotation: ", board);
                 var result = (THREE.MathUtils.radToDeg(angleBetweenAxleAndXAxis)).toFixed(4);
                 if (result) {
@@ -394,7 +403,6 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
                     reject('oops, something went wrong');
                 }
             })
-
         }
 
         //rotates a mesh's geometry about a specified axis and pivot
@@ -404,6 +412,19 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
             mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(mesh.position.x - axisPosition.x, mesh.position.y - axisPosition.y, mesh.position.z - axisPosition.z));  //translate geometry to axis location
             mesh.geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));    //rotate geometry about axis
             mesh.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(axisPosition.x - mesh.position.x, axisPosition.y - mesh.position.y, axisPosition.z - mesh.position.z));  //translate geometry back to original location
+            mesh.matrix.identity();
+        }
+        
+        const rotateAboutQuaternion = (mesh, axis, axisPosition, angle) => {
+            // from https://stackoverflow.com/a/32038265/2487730     not sure why it fails... 
+            axis.normalize();
+            mesh.updateMatrix();
+            var q = new THREE.Quaternion();
+            q.setFromAxisAngle(axis, angle);
+            mesh.applyQuaternion(q);
+            mesh.position.sub(axisPosition);
+            mesh.position.applyQuaternion(q);
+            mesh.position.add(axisPosition);
             mesh.matrix.identity();
         }
 
@@ -471,11 +492,11 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
                 document.getElementById("slider").value = tiltMe;
                 document.getElementById("tilt").textContent = "Board Tilt: " + tiltMe + "° ";
                 incrementalTV = tiltMe - previousTV;
+                console.log("----------------------------------------------", tiltMe);
                 axisHeading = await tiltTheModel(incrementalTV);
                 tempObj = { x: tiltMe, y: axisHeading };
                 modelData.push(tempObj);
                 previousTV = tiltMe;
-                // console.log("----------------------------------------------", tiltMe);
             }
             tiltValue = tiltMe
             // console.log("modelData: ",  modelData);
@@ -543,9 +564,9 @@ TTD: Figure out axis of board rotation. Is that the center of the board, the top
         </div>
 
     </div>
-    <div style="position: absolute; z-index: 99; font-size: 90px; color: orange;  opacity: 0.25;
-    top: 50%;    left: 50%;    margin-right: -50%;    transform: translate(-50%, -50%) rotate(-30deg);;"   >
-        Work in Progress!</div>
+    <!-- <div style="position: absolute; z-index: 99; font-size: 90px; color: orange;  opacity: 0.5;
+    top: 50%;    left: 50%;    margin-right: -50%;    transform: translate(-50%, -50%) rotate(-30deg);;">
+        Work in Progress!</div> -->
 
 </body>
 

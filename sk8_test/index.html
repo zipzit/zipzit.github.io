@@ -297,6 +297,7 @@ TTD: Add the reference to the Russian equation on the info page...
             // We want to use the Z displacement in lieu of perpendicular length?
             // we shift the pivot in the Z direction forward or aft to accomplish that.  
             var tempRakeAngle = 90 - hangerAxisAngle;
+            rakeDimension *= -1;
             var rakeHypotenuse = rakeDimension / Math.cos(THREE.MathUtils.degToRad(tempRakeAngle))
             console.log("rakeDimension: ", rakeDimension, " tempRakeAngle: ", tempRakeAngle, "rakeHpotenuse: ", rakeHypotenuse);
 
@@ -527,7 +528,12 @@ TTD: Add the reference to the Russian equation on the info page...
                 options: {
                     title: {
                         display: true,
-                        text: 'Board Tilt / Axle Direction - Truck Tilt: ' + tilt + '° '
+                        text: 'Board Tilt / Axle Direction - Truck Hanger Tilt Axis: ' + tilt + '° '
+                    },
+                    legend: {
+                        labels: {
+                            usePointStyle: true
+                        }
                     },
                     scales: {
                         xAxes: [{
@@ -535,7 +541,7 @@ TTD: Add the reference to the Russian equation on the info page...
                             position: 'bottom',
                             scaleLabel: {
                                 display: true,
-                                labelString: "Board Tilt"
+                                labelString: "Board Tilt (°)"
                             }
                         }],
                         yAxes: [{
@@ -543,7 +549,7 @@ TTD: Add the reference to the Russian equation on the info page...
                             position: 'left',
                             scaleLabel: {
                                 display: true,
-                                labelString: "Axle Direction"
+                                labelString: "Axle Direction (°)"
                             },
                             id: "idLeft"
                         },
@@ -552,7 +558,7 @@ TTD: Add the reference to the Russian equation on the info page...
                             position: 'right',
                             scaleLabel: {
                                 display: true,
-                                labelString: "Board Elevation Drop"
+                                labelString: "Board Elevation Drop (mm)"
                             },
                             id: "idRight",
                             ticks: {
@@ -632,7 +638,7 @@ TTD: Add the reference to the Russian equation on the info page...
         <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=15.0 max=75.1
                 value="45.0" step="5.0" id="hangerAngleSlider" orient="horizontal"> <span id="hangerAngle">Hanger Axis:
                 45° </span></div>
-        <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=-5.0 max=30.1
+        <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=-10.0 max=30.1
                 value="0" step="5.0" id="rakeSlider" orient="horizontal"> <span id="rake">Rake: 0 mm </span></div>
     </div>
     <div id="myModal" class="modal">
@@ -664,7 +670,7 @@ TTD: Add the reference to the Russian equation on the info page...
                 </div>
             </div>
             <div class="modal-footer">
-                <h4> 
+                <h4>
                     <a href="https://dogfeatherdesign.com">This model created by the folks at Dog Feather design...</a>
                 </h4>
                 <h5> <a href="https://github.com/zipzit/zipzit.github.io/tree/master/sk8_test">Click here for Source

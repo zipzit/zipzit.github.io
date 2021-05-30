@@ -1,26 +1,3 @@
-<!-- https://github.com/mrdoob/three.js/ which leads to: https://jsfiddle.net/8kubjpL5/ -->
-<!-- https://threejsfundamentals.org/threejs/lessons/threejs-fundamentals.html -->
-<!-- https://stackoverflow.com/questions/58092014/how-to-change-multiple-views-in-button-click-in-three-js -->
-
-<!-- (done) TTD: Add a reset button (page reload?)
-TTD: (done) Add Modal Info box
-TTD: (done) Add chart to the popup box
-TTD: (done) Add a variable rake offset via slider (zero to 12mm)
-TTD: (done) Make hanger angle variable from 70 down to 30 degrees
-TTD: Orthographic camera doesn't work.  You get a blank screen.  
-TTD: Add a way to plot / download output.  CSV?  XY Plot? 
-TTD: Improve the axle flattening algorithm, lose the break operator in that for loop.
-TTD: (Done) What is the Y height of the axle after each board tilt?  Does that number change? (info added to output chart)
-TTD: You could drop the board as the hanger tilts, but that is a bunch of work, and doesn't 
-     capture the simplicity of the model in current form (pivot at top of board).
-     instead capture "board drop" by measuring wheel axle height over range of motion.  
-TTD: (Done) Add checkboxes for helper visibility (grid and origin)     mesh.visible = true or false... 
-TTD: Make board design height a variable input?  What's the point of that?  We're not really looking at wheel bite here.  
-TTD: (Done) Figure out axis of board rotation. Is that the center of the board, the top or bottom of the board? dunno.  
-     The model is using the center of the board. What represents reality?
-TTD: Add the reference to the Russian equation on the info page... 
--->
-
 <!DOCTYPE html>
 <html>
 
@@ -32,8 +9,8 @@ TTD: Add the reference to the Russian equation on the info page...
 </head>
 
 <body>
-    <!--     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.js"></script> -->
-    <!--     <script type="module" src="https://cdn.jsdelivr.net/npm/three-orbitcontrols@2.110.3/OrbitControls.js"></script>  -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.js"></script> -->
+    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three-orbitcontrols@2.110.3/OrbitControls.js"></script>  -->
     <!-- <script src="./OrbitControls.js"></script> -->
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.module.js" integrity="sha512-zhgQMS7vG+f5CHv6IQ26VllGlG8KulkoNT44jKeYPtyYU0AhGBifWF3IiC7cIumzeVrerdvaw/McehsSGjC7Jw==" crossorigin="anonymous"></script> -->
 
@@ -139,7 +116,7 @@ TTD: Add the reference to the Russian equation on the info page...
                 location.reload();
             });
             document.querySelector("#info").addEventListener("click", () => {
-                console.log("info");
+                console.log("info/graph button pushed");
                 analyseTheWholeModel();
                 addAChart(hangerAxisAngle, rakeDimension);
                 document.getElementById("myModal").style.display = "block";
@@ -303,10 +280,16 @@ TTD: Add the reference to the Russian equation on the info page...
 
             hangerAxisPoints.push(new THREE.Vector3(0, 0, rakeHypotenuse));
             hangerAxisPoints.push(new THREE.Vector3(0, boardElevationY, tempzzz + rakeHypotenuse));
+            console.log("hangerAxisPoints: ", hangerAxisPoints);
+            // oops.  https://discourse.threejs.org/t/three-geometry-will-be-removed-from-core-with-r125/22401
+            // https://stackoverflow.com/questions/55464612/adding-removing-vertices-from-three-linesegment   
+            // THREE.bufferGeometry does not include vertices directly.
             truckHangerAxisLineGeometry = new THREE.BufferGeometry().setFromPoints(hangerAxisPoints);
+            // console.log("truckhangerAxisLineGeometry: ", truckHangerAxisLineGeometry.attributes);
             truckHangerAxisLine = new THREE.Line(truckHangerAxisLineGeometry, lineMaterial);
             truckHangerAxisLine.computeLineDistances();  // calculate the dashes in the dashed line
             truckHangerAxisLine.name = "hanger pivot axis LINE";
+            console.log("truckHangerAxisLine: ", truckHangerAxisLine);
             scene.add(truckHangerAxisLine);
 
             truckHangerRotationAxis = new THREE.CylinderGeometry(3, 3, tempLength, 20);   // when created, part is vertical
@@ -339,7 +322,7 @@ TTD: Add the reference to the Russian equation on the info page...
             boardShape.lineTo(500, -115);
             boardShape.lineTo(500, 115);
             boardShape.moveTo(0, 115);
-            var extrudedBoard = new THREE.ExtrudeGeometry(boardShape, { amount: 8, bevelEnabled: true, bevelSize: 5, bevelThickness: 5 })
+            var extrudedBoard = new THREE.ExtrudeGeometry(boardShape, { depth: 8, bevelEnabled: true, bevelSize: 5, bevelThickness: 5 })
             extrudedBoard.rotateX(THREE.MathUtils.degToRad(90)).rotateY(THREE.MathUtils.degToRad(90));
             extrudedBoard.translate(0, boardElevationY, 50);  // move board forward to accomodate extra rake
 
@@ -389,9 +372,12 @@ TTD: Add the reference to the Russian equation on the info page...
                 })
 
                 // now lets rotate the axle and wheel assy about the lower end of the hanger ..
-                let axleCenterPosition = truckHangerAxisLine.geometry.vertices[0];
+                // let axleCenterPosition = truckHangerAxisLine.geometry.vertices[0];
+                let tempVertice0 = new THREE.Vector3(truckHangerAxisLine.geometry.attributes.position.array[0], truckHangerAxisLine.geometry.attributes.position.array[1], truckHangerAxisLine.geometry.attributes.position.array[2]);
+                let tempVertice1 = new THREE.Vector3(truckHangerAxisLine.geometry.attributes.position.array[3], truckHangerAxisLine.geometry.attributes.position.array[4], truckHangerAxisLine.geometry.attributes.position.array[5]);
+                let axleCenterPosition = tempVertice0;
 
-                let hangerPivotAxis = new THREE.Vector3().subVectors(truckHangerAxisLine.geometry.vertices[0], truckHangerAxisLine.geometry.vertices[1]).normalize();
+                let hangerPivotAxis = new THREE.Vector3().subVectors(tempVertice0, tempVertice1).normalize();
                 // console.log( "Pivot position center: ( ", axleCenterPosition.x.toFixed(2), ", ", axleCenterPosition.y.toFixed(2), ", ", axleCenterPosition.z.toFixed(2) +
                 // ")   Pivot Axis orientation: ( ", hangerPivotAxis.x.toFixed(2), ", ", hangerPivotAxis.y.toFixed(2), ", ", hangerPivotAxis.z.toFixed(2), " )");
 
@@ -405,17 +391,25 @@ TTD: Add the reference to the Russian equation on the info page...
                 for (var i = 0; i <= 5000; i++) {
 
                     // wheelAxleTempVector = new THREE.Vector3().subVectors(board[3].children[3].geometry.vertices[1], board[3].children[3].geometry.vertices[0]).normalize();
-                    wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
+                    let tempVertice0 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[0], axleAxisLine.geometry.attributes.position.array[1], axleAxisLine.geometry.attributes.position.array[2]);
+                    let tempVertice1 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[3], axleAxisLine.geometry.attributes.position.array[4], axleAxisLine.geometry.attributes.position.array[5]);
+                    wheelAxleTempVector = new THREE.Vector3().subVectors(tempVertice1, tempVertice0).normalize();
 
                     console.log("wheelAxleVector: ", wheelAxleTempVector.x.toFixed(2), wheelAxleTempVector.y.toFixed(5), wheelAxleTempVector.z.toFixed(2), " indx: ", i, " increment: ", increment);
-                    if (wheelAxleTempVector.y <= 0.005 && wheelAxleTempVector.y >= -0.005) { break };  // was .001, that's too small, sometimes we miss.  
+                    if (wheelAxleTempVector.y <= 0.005 && wheelAxleTempVector.y >= -0.005) {  // was .001, that's too small, sometimes we miss.  
+                        console.log("Success, Axle is horizontal...");
+                        break
+                    };  
 
                     wheelsAndAxle.forEach(obj => {
                         rotateAbout(obj, hangerPivotAxis, axleCenterPosition, increment);
                         // rotateAboutQuaternion3(obj, hangerPivotAxis, axleCenterPosition, increment);   // fails... 
                     })
+                    tempVertice0 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[0], axleAxisLine.geometry.attributes.position.array[1], axleAxisLine.geometry.attributes.position.array[2]);
+                    tempVertice1 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[3], axleAxisLine.geometry.attributes.position.array[4], axleAxisLine.geometry.attributes.position.array[5]);
+                    wheelAxleTempVector2 = new THREE.Vector3().subVectors(tempVertice1, tempVertice0).normalize();
 
-                    wheelAxleTempVector2 = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
+                    // wheelAxleTempVector2 = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
                     // console.log("after wheelAxleVector2: ", wheelAxleTempVector2.x.toFixed(5), wheelAxleTempVector2.y.toFixed(5), wheelAxleTempVector2.z.toFixed(5));
 
                     // if (wheelAxleTempVector2.y >= wheelAxleTempVector.y) {
@@ -435,11 +429,16 @@ TTD: Add the reference to the Russian equation on the info page...
                         }
                     }
                 }
-                wheelAxleTempVector = new THREE.Vector3().subVectors(axleAxisLine.geometry.vertices[1], axleAxisLine.geometry.vertices[0]).normalize();
+                tempVertice0 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[0], axleAxisLine.geometry.attributes.position.array[1], axleAxisLine.geometry.attributes.position.array[2]);
+                tempVertice1 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[3], axleAxisLine.geometry.attributes.position.array[4], axleAxisLine.geometry.attributes.position.array[5]);
+                wheelAxleTempVector = new THREE.Vector3().subVectors(tempVertice1, tempVertice0).normalize();
                 let XAxisVector = new THREE.Vector3(1, 0, 0)
                 let angleBetweenAxleAndXAxis = wheelAxleTempVector.angleTo(XAxisVector);
                 console.log("AngleBetweenAxleAndXAxis: ", THREE.MathUtils.radToDeg(angleBetweenAxleAndXAxis).toFixed(3), " degrees");
-                axleElevation = (axleAxisLine.geometry.vertices[0].y + axleAxisLine.geometry.vertices[1].y) / 2;
+                //axleElevation = (axleAxisLine.geometry.vertices[0].y + axleAxisLine.geometry.vertices[1].y) / 2;
+                tempVertice0 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[0], axleAxisLine.geometry.attributes.position.array[1], axleAxisLine.geometry.attributes.position.array[2]);
+                tempVertice1 = new THREE.Vector3(axleAxisLine.geometry.attributes.position.array[3], axleAxisLine.geometry.attributes.position.array[4], axleAxisLine.geometry.attributes.position.array[5]);
+                axleElevation = (tempVertice0.y + tempVertice1.y)/2;
                 var result = { axleHeading: (THREE.MathUtils.radToDeg(angleBetweenAxleAndXAxis)).toFixed(4), axleElevation: axleElevation.toFixed(3) }
                 if (result) {
                     resolve(result)
@@ -634,7 +633,7 @@ TTD: Add the reference to the Russian equation on the info page...
 
     <div class="buttonContainer">
         <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=-25.0 max=25.1
-                value="0.0" step="0.25" id="slider" orient="horizontal"> <span id="tilt">Board Tilt° </span></div>
+                value="0.0" step="0.25" id="slider" orient="horizontal"> <span id="tilt">Board Tilt 0° </span></div>
         <div style="color: orange; float: right; margin: 5px 30px 5px 10px;"><input type="range" min=15.0 max=75.1
                 value="45.0" step="5.0" id="hangerAngleSlider" orient="horizontal"> <span id="hangerAngle">Hanger Axis:
                 45° </span></div>
@@ -687,6 +686,25 @@ TTD: Add the reference to the Russian equation on the info page...
 
 </html>
 
-</body>
+<!-- https://github.com/mrdoob/three.js/ which leads to: https://jsfiddle.net/8kubjpL5/ -->
+<!-- https://threejsfundamentals.org/threejs/lessons/threejs-fundamentals.html -->
+<!-- https://stackoverflow.com/questions/58092014/how-to-change-multiple-views-in-button-click-in-three-js -->
 
-</html>
+<!-- (done) TTD: Add a reset button (page reload?)
+TTD: (done) Add Modal Info box
+TTD: (done) Add chart to the popup box
+TTD: (done) Add a variable rake offset via slider (zero to 12mm)
+TTD: (done) Make hanger angle variable from 70 down to 30 degrees
+TTD: Orthographic camera doesn't work.  You get a blank screen.  
+TTD: Add a way to plot / download output.  CSV?  XY Plot? 
+TTD: Improve the axle flattening algorithm, lose the break operator in that for loop.
+TTD: (Done) What is the Y height of the axle after each board tilt?  Does that number change? (info added to output chart)
+TTD: You could drop the board as the hanger tilts, but that is a bunch of work, and doesn't 
+     capture the simplicity of the model in current form (pivot at top of board).
+     instead capture "board drop" by measuring wheel axle height over range of motion.  
+TTD: (Done) Add checkboxes for helper visibility (grid and origin)     mesh.visible = true or false... 
+TTD: Make board design height a variable input?  What's the point of that?  We're not really looking at wheel bite here.  
+TTD: (Done) Figure out axis of board rotation. Is that the center of the board, the top or bottom of the board? dunno.  
+     The model is using the center of the board. What represents reality?
+TTD: Add the reference to the Russian equation on the info page... 
+-->
